@@ -4,7 +4,7 @@
 
 作者：**clarklu**
 
-**[打开网页](https://luzihang123.github.io/tennis-value-guide/)** · [参与贡献](CONTRIBUTING.md)
+**[打开网页](https://clarklu.com/tennis-value-guide/)** · [参与贡献](CONTRIBUTING.md)
 
 ## 内容
 
