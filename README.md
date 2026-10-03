@@ -2,8 +2,6 @@
 
 一份持续更新的网球指南：从入门、练习和装备，到健身、场地与约球。城市篇从上海和东京开始。
 
-作者：**clarklu**
-
 **网页骨架：** [中文](https://clarklu.com/tennis-value-guide/) · [English](https://clarklu.com/tennis-value-guide/en/) · [日本語](https://clarklu.com/tennis-value-guide/ja/) · [参与贡献](CONTRIBUTING.md)
 
 ## 内容

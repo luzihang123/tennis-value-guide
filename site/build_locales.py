@@ -40,7 +40,7 @@ TEXT = {
             ('订场', '网球墙', '陪练', '约球'),
         ),
         'city_note': ('已有公开资料', '中文骨架待确认'),
-        'footer': '作者 clarklu', 'contribute': '参与共建 ↗',
+        'contribute': '参与共建 ↗',
     },
     'en': {
         'lang': 'en', 'title': 'Tennis Value Guide', 'nav': ('Guide', 'Cities'),
@@ -62,7 +62,7 @@ TEXT = {
             ('Courts', 'Practice walls', 'Hitting partners', 'Find players'),
         ),
         'city_note': ('Public sources added', 'Chinese outline pending review'),
-        'footer': 'By clarklu', 'contribute': 'Contribute ↗',
+        'contribute': 'Contribute ↗',
     },
     'ja': {
         'lang': 'ja', 'title': 'コスパのよいテニスガイド', 'nav': ('ガイド', '都市別'),
@@ -84,7 +84,7 @@ TEXT = {
             ('コート予約', '壁打ち', '練習相手', '仲間探し'),
         ),
         'city_note': ('公開資料を掲載', '中国語の骨組みを確認中'),
-        'footer': '著者 clarklu', 'contribute': '共同編集 ↗',
+        'contribute': '共同編集 ↗',
     },
 }
 
@@ -137,7 +137,7 @@ def render(code, data):
     <section id="guide" class="panel"><div class="wrap"><p class="tag">THE GUIDE</p><h2>{q(data['guide'])}</h2><p class="translation-note">{q(data['notice'])}</p><div class="grid">{cards}</div></div></section>
     <section id="cities" class="wrap city"><p class="tag">CITY NOTES</p><h2>{q(data['city_heading'])}</h2><p>{q(data['city_intro'])}</p><div class="city-grid">{cities}</div></section>
   </main>
-  <footer><div class="wrap">{q(data['title'])} · {q(data['footer'])}<a href="{REPO}">{q(data['contribute'])}</a></div></footer>
+  <footer><div class="wrap">{q(data['title'])}<a href="{REPO}">{q(data['contribute'])}</a></div></footer>
 </body>
 </html>
 '''
