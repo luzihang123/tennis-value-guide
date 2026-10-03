@@ -18,7 +18,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
-      - name: Generate website pages
+      - name: Prepare website and Markdown content
         run: python3 site/build_locales.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

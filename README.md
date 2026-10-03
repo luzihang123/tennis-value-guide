@@ -2,7 +2,7 @@
 
 一份持续更新的网球指南：从入门、练习和装备，到健身、场地与约球。城市篇从上海和东京开始。
 
-**网页骨架：** [中文](https://clarklu.com/tennis-value-guide/) · [English](https://clarklu.com/tennis-value-guide/en/) · [日本語](https://clarklu.com/tennis-value-guide/ja/) · [参与贡献](CONTRIBUTING.md)
+**在线阅读：** [中文](https://clarklu.com/tennis-value-guide/) · [English](https://clarklu.com/tennis-value-guide/en/) · [日本語](https://clarklu.com/tennis-value-guide/ja/) · [参与贡献](CONTRIBUTING.md)
 
 ## 内容
 
@@ -18,4 +18,4 @@
 
 已补充首版实用内容，后续继续加入实测。价格、开放时间和产品信息应附来源与核验日期。
 
-三语网页目录由 `site/build_locales.py` 生成，正文目前以中文为准。后续逐篇确认译文的方案见 [ARCHITECTURE.md](ARCHITECTURE.md)。
+网页在浏览器中读取 Markdown 正文，英文和日文目前提供界面与目录翻译，正文以中文为准。技术与翻译安排见 [ARCHITECTURE.md](ARCHITECTURE.md)。
