@@ -7,20 +7,8 @@ from urllib.parse import quote
 ROOT = Path(__file__).resolve().parent
 REPO = 'https://github.com/luzihang123/tennis-value-guide'
 BASE = 'https://clarklu.com/tennis-value-guide/'
-TOPICS = [
-    ('book/01-入门与预算.md', 'blob'),
-    ('book/02-技术与练习', 'tree'),
-    ('book/03-装备与训练器材', 'tree'),
-    ('book/04-数字工具与智能硬件', 'tree'),
-    ('book/05-健身', 'tree'),
-    ('book/06-场地与订场.md', 'blob'),
-    ('book/07-约球与比赛.md', 'blob'),
-]
-CITY_TOPICS = {
-    '上海': ['01-订场', '02-约球', '03-教练', '04-陪练', '05-网球墙',
-           '06-发球机与练习场', '07-试拍与租拍', '08-穿线', '09-赛事与活动'],
-    '东京': ['订场', '网球墙', '陪练', '约球'],
-}
+CITY_TOPICS = ['01-订场', '02-约球', '03-教练', '04-陪练', '05-网球墙',
+               '06-发球机与练习场', '07-试拍与租拍', '08-穿线', '09-赛事与活动']
 TEXT = {
     'zh': {
         'lang': 'zh-CN', 'title': '高性价比网球指南', 'nav': ('指南', '城市'),
@@ -34,12 +22,9 @@ TEXT = {
             ('装备与训练器材', '球拍、球鞋、发球机'), ('数字工具与智能硬件', '小程序、App、硬件'),
             ('健身', '体能、恢复与饮食'), ('场地与订场', '怎样比较场地'), ('约球与比赛', '找球友、拼场、比赛'),
         ],
-        'cities': ('上海', '东京'),
-        'city_topics': (
-            ('订场', '约球', '教练', '陪练', '网球墙', '发球机与练习场', '试拍与租拍', '穿线', '赛事与活动'),
-            ('订场', '网球墙', '陪练', '约球'),
-        ),
-        'city_note': ('已有公开资料', '中文骨架待确认'),
+        'cities': ('上海', '东京'), 'city_label': '选择城市',
+        'city_topics': ('订场', '约球', '教练', '陪练', '网球墙', '发球机与练习场', '试拍与租拍', '穿线', '赛事与活动'),
+        'detail_pending': '内容待整理。', 'back': '返回指南目录',
         'contribute': '参与共建 ↗',
     },
     'en': {
@@ -55,13 +40,10 @@ TEXT = {
             ('Fitness', 'Conditioning, recovery and food'), ('Courts & booking', 'Compare the real cost of a court'),
             ('Partners & matches', 'Find players and join matches'),
         ],
-        'cities': ('Shanghai', 'Tokyo'),
-        'city_topics': (
-            ('Courts', 'Find players', 'Coaches', 'Hitting partners', 'Practice walls',
-             'Ball machines & practice courts', 'Demo & rental rackets', 'Stringing', 'Tournaments & events'),
-            ('Courts', 'Practice walls', 'Hitting partners', 'Find players'),
-        ),
-        'city_note': ('Public sources added', 'Chinese outline pending review'),
+        'cities': ('Shanghai', 'Tokyo'), 'city_label': 'Choose a city',
+        'city_topics': ('Courts', 'Find players', 'Coaches', 'Hitting partners', 'Practice walls',
+                        'Ball machines & practice courts', 'Demo & rental rackets', 'Stringing', 'Tournaments & events'),
+        'detail_pending': 'Content coming soon.', 'back': 'Back to the guide',
         'contribute': 'Contribute ↗',
     },
     'ja': {
@@ -77,13 +59,10 @@ TEXT = {
             ('体づくり', '体力、回復、食事'), ('コートと予約', 'コートの実質的な費用を比べる'),
             ('仲間と試合', '相手を探し、試合に参加する'),
         ],
-        'cities': ('上海', '東京'),
-        'city_topics': (
-            ('コート予約', '仲間探し', 'コーチ', '練習相手', '壁打ち', '球出し機と練習場',
-             '試打とレンタル', 'ガット張り', '大会とイベント'),
-            ('コート予約', '壁打ち', '練習相手', '仲間探し'),
-        ),
-        'city_note': ('公開資料を掲載', '中国語の骨組みを確認中'),
+        'cities': ('上海', '東京'), 'city_label': '都市を選択',
+        'city_topics': ('コート予約', '仲間探し', 'コーチ', '練習相手', '壁打ち', '球出し機と練習場',
+                        '試打とレンタル', 'ガット張り', '大会とイベント'),
+        'detail_pending': '内容は準備中です。', 'back': 'ガイドの目次に戻る',
         'contribute': '共同編集 ↗',
     },
 }
@@ -104,17 +83,14 @@ def render(code, data):
                ('../' if key == 'zh' else f'{"" if code == "zh" else "../"}{key}/'))
         languages += f'<a href="{url}" lang="{TEXT[key]["lang"]}"{active}>{label}</a>'
     cards = ''.join(
-        f'<a href="{href(path, kind)}"><small>{i:02d}</small><strong>{q(title)}</strong><span>{q(desc)}</span></a>'
-        for i, ((path, kind), (title, desc)) in enumerate(zip(TOPICS, data['topics']), 1)
+        f'<a href="guide/{i:02d}.html"><small>{i:02d}</small><strong>{q(title)}</strong><span>{q(desc)}</span></a>'
+        for i, (title, desc) in enumerate(data['topics'], 1)
     )
     cities = ''.join(
-        '<div class="city-block">'
-        f'<h3>{q(data["cities"][i])}</h3><p>{q(data["city_note"][i])}</p><div class="city-links">'
-        + ''.join(
-            f'<a href="{href(f"cities/{city}/{source}.md")}">{q(label)} ↗</a>'
-            for source, label in zip(CITY_TOPICS[city], data['city_topics'][i])
-        ) + '</div></div>'
-        for i, city in enumerate(('上海', '东京'))
+        f'<a href="{href(f"cities/上海/{source}.md")}" '
+        f'data-shanghai="{href(f"cities/上海/{source}.md")}" '
+        f'data-tokyo="{href(f"cities/东京/{source}.md")}">{q(label)} ↗</a>'
+        for source, label in zip(CITY_TOPICS, data['city_topics'])
     )
     alternates = ''.join(
         f'<link rel="alternate" hreflang="{TEXT[key]["lang"]}" href="{BASE}{"" if key == "zh" else key + "/"}">'
@@ -135,8 +111,31 @@ def render(code, data):
   <main id="top">
     <section class="hero wrap"><p class="tag">OPEN TENNIS GUIDE</p><h1>{q(data['hero'][0])}<br><em>{q(data['hero'][1])}</em></h1><p>{q(data['intro'])}</p><a class="button" href="#guide">{q(data['button'])}</a></section>
     <section id="guide" class="panel"><div class="wrap"><p class="tag">THE GUIDE</p><h2>{q(data['guide'])}</h2><p class="translation-note">{q(data['notice'])}</p><div class="grid">{cards}</div></div></section>
-    <section id="cities" class="wrap city"><p class="tag">CITY NOTES</p><h2>{q(data['city_heading'])}</h2><p>{q(data['city_intro'])}</p><div class="city-grid">{cities}</div></section>
+    <section id="cities" class="wrap city"><p class="tag">CITY NOTES</p><h2>{q(data['city_heading'])}</h2><p>{q(data['city_intro'])}</p><label class="city-picker" for="city-select">{q(data['city_label'])}<select id="city-select"><option value="shanghai">{q(data['cities'][0])}</option><option value="tokyo">{q(data['cities'][1])}</option></select></label><div id="city-links" class="city-links">{cities}</div></section>
   </main>
+  <footer><div class="wrap">{q(data['title'])}<a href="{REPO}">{q(data['contribute'])}</a></div></footer>
+  <script>document.getElementById('city-select').addEventListener('change', function () {{
+    document.querySelectorAll('#city-links a').forEach(link => {{ link.href = link.dataset[this.value]; }});
+  }});</script>
+</body>
+</html>
+'''
+
+
+def render_detail(data, index):
+    q = lambda value: escape(value, quote=True)
+    title = data['topics'][index - 1][0]
+    return f'''<!doctype html>
+<html lang="{data['lang']}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{q(title)} · {q(data['title'])}</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="wrap"><a class="brand" href="../index.html">● {q(data['title'])}</a></header>
+  <main class="wrap detail"><a href="../index.html#guide">← {q(data['back'])}</a><p class="tag">THE GUIDE · {index:02d}</p><h1>{q(title)}</h1><p>{q(data['detail_pending'])}</p></main>
   <footer><div class="wrap">{q(data['title'])}<a href="{REPO}">{q(data['contribute'])}</a></div></footer>
 </body>
 </html>
@@ -148,3 +147,7 @@ for code, data in TEXT.items():
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(render(code, data), encoding='utf-8')
     print(output.relative_to(ROOT))
+    for index in range(1, len(data['topics']) + 1):
+        detail = output.parent / 'guide' / f'{index:02d}.html'
+        detail.parent.mkdir(parents=True, exist_ok=True)
+        detail.write_text(render_detail(data, index), encoding='utf-8')
