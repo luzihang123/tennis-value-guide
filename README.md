@@ -4,7 +4,7 @@
 
 作者：**clarklu**
 
-**[打开网页](https://clarklu.com/tennis-value-guide/)** · [参与贡献](CONTRIBUTING.md)
+**网页骨架：** [中文](https://clarklu.com/tennis-value-guide/) · [English](https://clarklu.com/tennis-value-guide/en/) · [日本語](https://clarklu.com/tennis-value-guide/ja/) · [参与贡献](CONTRIBUTING.md)
 
 ## 内容
 
@@ -20,4 +20,4 @@
 
 已补充首版实用内容，后续继续加入实测。价格、开放时间和产品信息应附来源与核验日期。
 
-网页源码位于 `site/`，由 GitHub Pages 发布。多语言目标架构见 [ARCHITECTURE.md](ARCHITECTURE.md)。
+三语网页目录由 `site/build_locales.py` 生成，正文目前以中文为准。后续逐篇确认译文的方案见 [ARCHITECTURE.md](ARCHITECTURE.md)。
