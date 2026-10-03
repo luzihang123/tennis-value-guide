@@ -23,11 +23,22 @@
   };
   const link = (label, target) => {
     if (/^https?:\/\//.test(target)) return `<a href="${escapeHtml(target)}">${label}</a>`;
-    const [file, hash = ''] = target.split('#');
+    const [file, rawHash = ''] = target.split('#');
+    let hash = rawHash;
+    try { hash = decodeURIComponent(rawHash); } catch {}
+    const fragment = hash ? '#' + encodeURIComponent(hash) : '';
+    if (!file) return fragment ? `<a href="${fragment}">${label}</a>` : label;
     const next = normalize(file);
     if (!next) return label;
-    return `<a href="reader.html?path=${encodeURIComponent(next)}${hash ? '#' + encodeURIComponent(hash) : ''}">${label}</a>`;
+    return `<a href="reader.html?path=${encodeURIComponent(next)}${fragment}">${label}</a>`;
   };
+  // GitHub-style heading slug, so links written for GitHub also work here.
+  const slugify = value => value
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s_-]/gu, '')
+    .trim()
+    .replace(/\s/g, '-');
   const inline = value => {
     let result = escapeHtml(value);
     result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, target) => link(label, target.replaceAll('&amp;', '&')));
@@ -37,6 +48,7 @@
   function markdown(source) {
     const lines = source.replace(/\r\n/g, '\n').split('\n');
     const blocks = [];
+    const slugCounts = {};
     let paragraph = [], list = [], listTag = '';
     const flush = () => {
       if (paragraph.length) { blocks.push(`<p>${inline(paragraph.join(' '))}</p>`); paragraph = []; }
@@ -57,7 +69,16 @@
         continue;
       }
       const heading = line.match(/^(#{1,6})\s+(.+)$/);
-      if (heading) { flush(); const n = heading[1].length; blocks.push(`<h${n}>${inline(heading[2])}</h${n}>`); continue; }
+      if (heading) {
+        flush();
+        const n = heading[1].length;
+        const base = slugify(heading[2]);
+        const count = slugCounts[base] || 0;
+        slugCounts[base] = count + 1;
+        const id = count ? `${base}-${count}` : base;
+        blocks.push(`<h${n}${id ? ` id="${escapeHtml(id)}"` : ''}>${inline(heading[2])}</h${n}>`);
+        continue;
+      }
       if (/^>\s?/.test(line)) { flush(); blocks.push(`<blockquote>${inline(line.replace(/^>\s?/, ''))}</blockquote>`); continue; }
       const item = line.match(/^([-*]|\d+\.)\s+(.+)$/);
       if (item) {
@@ -87,5 +108,11 @@
     const heading = source.match(/^#\s+(.+)$/m);
     if (heading) { title.textContent = heading[1]; document.title = heading[1] + ' · ' + document.title; }
     content.innerHTML = markdown(source.replace(/^#\s+.+\n?/, ''));
+    // The browser tried to scroll before the article existed.
+    if (location.hash) {
+      let id = location.hash.slice(1);
+      try { id = decodeURIComponent(id); } catch {}
+      document.getElementById(id)?.scrollIntoView();
+    }
   }).catch(() => { content.textContent = messages[locale][1]; });
 })();

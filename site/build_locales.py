@@ -133,7 +133,7 @@ def render_home(code, data):
   <link rel="stylesheet" href="{prefix}style.css">
 </head>
 <body>
-  <header class="wrap"><a class="brand" href="#top"><img src="{prefix}logo.svg" alt="">{q(data['title'])}</a><nav>{navigation}</nav><div class="language" role="group" aria-label="Language">{languages}</div></header>
+  <header class="wrap"><a class="brand" href="#top"><img src="{prefix}logo.svg" alt="" width="28" height="28">{q(data['title'])}</a><nav>{navigation}</nav><div class="language" role="group" aria-label="Language">{languages}</div></header>
   <main id="top">
     <section class="hero wrap"><p class="tag">OPEN TENNIS GUIDE</p><h1>{q(data['hero'][0])}<br><em>{q(data['hero'][1])}</em></h1><p>{q(data['intro'])}</p><a class="button" href="#guide">{q(data['button'])}</a></section>
     <section id="guide" class="panel"><div class="wrap"><p class="tag">THE GUIDE</p><h2>{q(data['guide'])}</h2><p class="translation-note">{q(data['notice'])}</p><div class="grid">{cards}</div></div></section>
@@ -162,7 +162,7 @@ def render_reader(code, data):
   <link rel="stylesheet" href="{prefix}style.css">
 </head>
 <body data-content-prefix="{prefix}" data-locale="{code}">
-  <header class="wrap"><a class="brand" href="index.html"><img src="{prefix}logo.svg" alt="">{q(data['title'])}</a><div class="language" role="group" aria-label="Language">{languages}</div></header>
+  <header class="wrap"><a class="brand" href="index.html"><img src="{prefix}logo.svg" alt="" width="28" height="28">{q(data['title'])}</a><div class="language" role="group" aria-label="Language">{languages}</div></header>
   <main class="wrap detail"><a href="index.html">← {q(data['back'])}</a><p class="tag">OPEN TENNIS GUIDE</p><h1 id="reader-title">{q(data['title'])}</h1><p class="translation-note">{q(data['notice'])}</p><div id="reader-content" class="article-body" aria-live="polite">{q(data['detail_pending'])}</div></main>
   <footer><div class="wrap">{q(data['title'])}<a href="{REPO}">{q(data['contribute'])}</a></div></footer>
   <script src="{prefix}reader.js" defer></script>
