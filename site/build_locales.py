@@ -16,7 +16,11 @@ TOPICS = [
     ('book/06-场地与订场.md', 'blob'),
     ('book/07-约球与比赛.md', 'blob'),
 ]
-CITY_TOPICS = ['订场', '网球墙', '陪练', '约球']
+CITY_TOPICS = {
+    '上海': ['01-订场', '02-约球', '03-教练', '04-陪练', '05-网球墙',
+           '06-发球机与练习场', '07-试拍与租拍', '08-穿线', '09-赛事与活动'],
+    '东京': ['订场', '网球墙', '陪练', '约球'],
+}
 TEXT = {
     'zh': {
         'lang': 'zh-CN', 'title': '高性价比网球指南', 'nav': ('指南', '城市'),
@@ -30,7 +34,11 @@ TEXT = {
             ('装备与训练器材', '球拍、球鞋、发球机'), ('数字工具与智能硬件', '小程序、App、硬件'),
             ('健身', '体能、恢复与饮食'), ('场地与订场', '怎样比较场地'), ('约球与比赛', '找球友、拼场、比赛'),
         ],
-        'cities': ('上海', '东京'), 'city_topics': CITY_TOPICS,
+        'cities': ('上海', '东京'),
+        'city_topics': (
+            ('订场', '约球', '教练', '陪练', '网球墙', '发球机与练习场', '试拍与租拍', '穿线', '赛事与活动'),
+            ('订场', '网球墙', '陪练', '约球'),
+        ),
         'city_note': ('已有公开资料', '中文骨架待确认'),
         'footer': '作者 clarklu', 'contribute': '参与共建 ↗',
     },
@@ -47,7 +55,12 @@ TEXT = {
             ('Fitness', 'Conditioning, recovery and food'), ('Courts & booking', 'Compare the real cost of a court'),
             ('Partners & matches', 'Find players and join matches'),
         ],
-        'cities': ('Shanghai', 'Tokyo'), 'city_topics': ('Courts', 'Practice walls', 'Hitting partners', 'Find players'),
+        'cities': ('Shanghai', 'Tokyo'),
+        'city_topics': (
+            ('Courts', 'Find players', 'Coaches', 'Hitting partners', 'Practice walls',
+             'Ball machines & practice courts', 'Demo & rental rackets', 'Stringing', 'Tournaments & events'),
+            ('Courts', 'Practice walls', 'Hitting partners', 'Find players'),
+        ),
         'city_note': ('Public sources added', 'Chinese outline pending review'),
         'footer': 'By clarklu', 'contribute': 'Contribute ↗',
     },
@@ -64,7 +77,12 @@ TEXT = {
             ('体づくり', '体力、回復、食事'), ('コートと予約', 'コートの実質的な費用を比べる'),
             ('仲間と試合', '相手を探し、試合に参加する'),
         ],
-        'cities': ('上海', '東京'), 'city_topics': ('コート予約', '壁打ち', '練習相手', '仲間探し'),
+        'cities': ('上海', '東京'),
+        'city_topics': (
+            ('コート予約', '仲間探し', 'コーチ', '練習相手', '壁打ち', '球出し機と練習場',
+             '試打とレンタル', 'ガット張り', '大会とイベント'),
+            ('コート予約', '壁打ち', '練習相手', '仲間探し'),
+        ),
         'city_note': ('公開資料を掲載', '中国語の骨組みを確認中'),
         'footer': '著者 clarklu', 'contribute': '共同編集 ↗',
     },
@@ -94,7 +112,7 @@ def render(code, data):
         f'<h3>{q(data["cities"][i])}</h3><p>{q(data["city_note"][i])}</p><div class="city-links">'
         + ''.join(
             f'<a href="{href(f"cities/{city}/{source}.md")}">{q(label)} ↗</a>'
-            for source, label in zip(CITY_TOPICS, data['city_topics'])
+            for source, label in zip(CITY_TOPICS[city], data['city_topics'][i])
         ) + '</div></div>'
         for i, city in enumerate(('上海', '东京'))
     )
