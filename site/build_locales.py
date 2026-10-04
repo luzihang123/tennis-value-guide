@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Generate language shells and copy Markdown for the browser reader."""
+from hashlib import sha1
 from html import escape
 from pathlib import Path
 from shutil import copytree, rmtree
@@ -9,6 +10,8 @@ ROOT = Path(__file__).resolve().parent
 SOURCE = ROOT.parent
 REPO = 'https://github.com/luzihang123/tennis-value-guide'
 BASE = 'https://clarklu.com/tennis-value-guide/'
+# Content hashes bust stale browser caches after each deploy.
+VERSION = {name: sha1((ROOT / name).read_bytes()).hexdigest()[:8] for name in ('style.css', 'reader.js')}
 CITY_DIRS = (('shanghai', '上海'), ('tokyo', '东京'))
 CITY_TOPICS = ['01-订场', '02-约球', '03-教练', '04-陪练', '05-网球墙',
                '06-发球机与练习场', '07-试拍与租拍', '08-穿线',
@@ -86,12 +89,28 @@ TEXT = {
 }
 
 
+# Decorative court drawing for the home hero; colours come from style.css.
+COURT = (
+    '<svg class="court" viewBox="0 0 360 480" aria-hidden="true" focusable="false">'
+    '<rect class="court-surface" x="0" y="0" width="360" height="480" rx="22"/>'
+    '<g class="court-lines">'
+    '<rect x="30" y="30" width="300" height="420"/>'
+    '<path d="M67 30v420M293 30v420M67 135h226M67 345h226M180 135v210M180 30v10M180 440v10"/>'
+    '</g>'
+    '<path class="court-net" d="M18 240h324"/>'
+    '<path class="court-arc" d="M110 410C130 300 190 210 252 158"/>'
+    '<circle class="court-ball" cx="262" cy="150" r="13"/>'
+    '<path class="court-seam" d="M252 141c7 5 7 13 1 19M272 141c-7 5-7 13-1 19"/>'
+    '</svg>'
+)
+
 
 def reader_link(path):
     return 'reader.html?path=' + quote(path, safe='')
 
 
 def render_home(code, data):
+    notice = '' if code == 'zh' else f'<p class="translation-note">{escape(data["notice"])}</p>'
     q = lambda value: escape(value, quote=True)
     prefix = '../' if code != 'zh' else ''
     navigation = f'<a href="#guide">{q(data["nav"][0])}</a><a href="#cities">{q(data["nav"][1])}</a><a href="{REPO}">GitHub ↗</a>'
@@ -110,7 +129,7 @@ def render_home(code, data):
         + ''.join(
             f'<div class="city-group"><h4>{q(data["city_groups"][group_index])}</h4><div class="city-links">'
             + ''.join(
-                f'<a href="{reader_link(f"cities/{city_dir}/{CITY_TOPICS[i]}/README.md")}">{q(data["city_topics"][i])} ↗</a>'
+                f'<a href="{reader_link(f"cities/{city_dir}/{CITY_TOPICS[i]}/README.md")}">{q(data["city_topics"][i])}</a>'
                 for i in range(start, end)
             ) + '</div></div>'
             for group_index, (start, end) in enumerate(CITY_GROUPS)
@@ -130,13 +149,13 @@ def render_home(code, data):
   <title>{q(data['title'])}</title>
   {alternates}
   <link rel="icon" type="image/svg+xml" href="{prefix}logo.svg">
-  <link rel="stylesheet" href="{prefix}style.css">
+  <link rel="stylesheet" href="{prefix}style.css?v={VERSION['style.css']}">
 </head>
 <body>
-  <header class="wrap"><a class="brand" href="#top"><img src="{prefix}logo.svg" alt="" width="28" height="28">{q(data['title'])}</a><nav>{navigation}</nav><div class="language" role="group" aria-label="Language">{languages}</div></header>
+  <header class="site-header"><div class="wrap"><a class="brand" href="#top"><img src="{prefix}logo.svg" alt="" width="28" height="28">{q(data['title'])}</a><nav>{navigation}</nav><div class="language" role="group" aria-label="Language">{languages}</div></div></header>
   <main id="top">
-    <section class="hero wrap"><p class="tag">OPEN TENNIS GUIDE</p><h1>{q(data['hero'][0])}<br><em>{q(data['hero'][1])}</em></h1><p>{q(data['intro'])}</p><a class="button" href="#guide">{q(data['button'])}</a></section>
-    <section id="guide" class="panel"><div class="wrap"><p class="tag">THE GUIDE</p><h2>{q(data['guide'])}</h2><p class="translation-note">{q(data['notice'])}</p><div class="grid">{cards}</div></div></section>
+    <section class="hero wrap"><div class="hero-text"><p class="tag">OPEN TENNIS GUIDE</p><h1>{q(data['hero'][0])}<br><em>{q(data['hero'][1])}</em></h1><p>{q(data['intro'])}</p><a class="button" href="#guide">{q(data['button'])}</a></div>{COURT}</section>
+    <section id="guide" class="panel"><div class="wrap"><p class="tag">THE GUIDE</p><h2>{q(data['guide'])}</h2>{notice}<div class="grid">{cards}</div></div></section>
     <section id="cities" class="wrap city"><p class="tag">CITY NOTES</p><h2>{q(data['city_heading'])}</h2><p>{q(data['city_intro'])}</p><div class="city-grid">{cities}</div></section>
   </main>
   <footer><div class="wrap">{q(data['title'])}<a href="{REPO}">{q(data['contribute'])}</a></div></footer>
@@ -146,6 +165,7 @@ def render_home(code, data):
 
 
 def render_reader(code, data):
+    notice = '' if code == 'zh' else f'<p class="translation-note">{escape(data["notice"])}</p>'
     q = lambda value: escape(value, quote=True)
     prefix = '../' if code != 'zh' else ''
     languages = ''.join(
@@ -159,13 +179,13 @@ def render_reader(code, data):
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{q(data['title'])}</title>
   <link rel="icon" type="image/svg+xml" href="{prefix}logo.svg">
-  <link rel="stylesheet" href="{prefix}style.css">
+  <link rel="stylesheet" href="{prefix}style.css?v={VERSION['style.css']}">
 </head>
 <body data-content-prefix="{prefix}" data-locale="{code}">
-  <header class="wrap"><a class="brand" href="index.html"><img src="{prefix}logo.svg" alt="" width="28" height="28">{q(data['title'])}</a><div class="language" role="group" aria-label="Language">{languages}</div></header>
-  <main class="wrap detail"><a href="index.html">← {q(data['back'])}</a><p class="tag">OPEN TENNIS GUIDE</p><h1 id="reader-title">{q(data['title'])}</h1><p class="translation-note">{q(data['notice'])}</p><div id="reader-content" class="article-body" aria-live="polite">{q(data['detail_pending'])}</div></main>
+  <header class="site-header"><div class="wrap"><a class="brand" href="index.html"><img src="{prefix}logo.svg" alt="" width="28" height="28">{q(data['title'])}</a><div class="language" role="group" aria-label="Language">{languages}</div></div></header>
+  <main class="wrap detail"><a class="back-link" href="index.html">← {q(data['back'])}</a><p class="tag">OPEN TENNIS GUIDE</p><h1 id="reader-title">{q(data['title'])}</h1>{notice}<div id="reader-content" class="article-body" aria-live="polite">{q(data['detail_pending'])}</div></main>
   <footer><div class="wrap">{q(data['title'])}<a href="{REPO}">{q(data['contribute'])}</a></div></footer>
-  <script src="{prefix}reader.js" defer></script>
+  <script src="{prefix}reader.js?v={VERSION['reader.js']}" defer></script>
 </body>
 </html>
 '''
