@@ -2,6 +2,7 @@
 """Generate language shells and copy Markdown for the browser reader."""
 from hashlib import sha1
 from html import escape
+import re
 from pathlib import Path
 from shutil import copytree, rmtree
 from urllib.parse import quote
@@ -13,16 +14,18 @@ BASE = 'https://clarklu.com/tennis-value-guide/'
 # Content hashes bust stale browser caches after each deploy.
 VERSION = {name: sha1((ROOT / name).read_bytes()).hexdigest()[:8] for name in ('style.css', 'reader.js')}
 CITY_DIRS = (('shanghai', '上海'), ('tokyo', '东京'))
-CITY_TOPICS = ['01-订场', '02-约球', '03-教练', '04-陪练', '05-网球墙',
-               '06-发球机与练习场', '07-试拍与租拍', '08-穿线',
+CITY_TOPICS = ['01-订场', '02-网球墙', '03-发球机与练习场',
+               '04-约球', '05-教练', '06-陪练',
+               '07-试拍与租拍', '08-穿线',
                '09-赛事与活动', '10-网旅']
 GUIDE_PATHS = [
-    'book/01-入门与预算.md', 'book/02-技术与练习/README.md',
-    'book/03-装备与训练器材/README.md', 'book/04-数字工具与智能硬件/README.md',
-    'book/05-健身/README.md', 'book/06-场地与订场.md',
-    'book/07-约球与比赛.md',
+    'book/01-入门与预算.md', 'book/02-场地与订场.md', 'book/03-约球与比赛.md',
+    'book/04-技术与练习/README.md', 'book/05-装备与训练器材/README.md',
+    'book/06-健身/README.md', 'book/07-数字工具与智能硬件/README.md',
 ]
-CITY_GROUPS = ((0, 6), (6, 8), (8, 10))
+CITY_GROUPS = ((0, 3), (3, 6), (6, 8), (8, 10))
+# Placeholder text that marks a city topic as not yet written.
+PENDING_MARKERS = ('内容待整理', '内容待确认')
 TEXT = {
     'zh': {
         'lang': 'zh-CN', 'title': '高性价比网球指南', 'nav': ('指南', '城市'),
@@ -32,13 +35,13 @@ TEXT = {
         'city_intro': '从上海和东京开始。东京篇目前是待确认的中文骨架。',
         'notice': '目前正文以中文为准。英文和日文先提供已翻译的目录骨架。',
         'topics': [
-            ('入门与预算', '从第一次打球开始'), ('技术与练习', '动作、计划与跨球类学习'),
-            ('装备与训练器材', '球拍、球鞋、发球机'), ('数字工具与智能硬件', '小程序、App、硬件'),
-            ('健身', '体能、恢复与饮食'), ('场地与订场', '怎样比较场地'), ('约球与比赛', '找球友、拼场、比赛'),
+            ('入门与预算', '从第一次打球开始'), ('场地与订场', '怎样比较场地'), ('约球与比赛', '找球友、拼场、比赛'),
+            ('技术与练习', '动作、计划与跨球类学习'), ('装备与训练器材', '球拍、球鞋、发球机'),
+            ('健身', '体能、恢复与饮食'), ('数字工具与智能硬件', '小程序、App、硬件'),
         ],
         'cities': ('上海', '东京'),
-        'city_topics': ('订场', '约球', '教练', '陪练', '网球墙', '发球机与练习场', '试拍与租拍', '穿线', '赛事与活动', '网旅'),
-        'city_groups': ('打球与练习', '器材与服务', '活动与网旅'),
+        'city_topics': ('订场', '网球墙', '发球机与练习场', '约球', '教练', '陪练', '试拍与租拍', '穿线', '赛事与活动', '网旅'),
+        'city_groups': ('找场地', '找人', '器材服务', '赛事与出行'), 'pending': '筹备中',
         'detail_pending': '内容待整理。', 'back': '返回指南目录',
         'overview': '概览', 'back_city': '返回城市目录', 'back_topic': '返回分类目录',
         'contribute': '参与共建 ↗',
@@ -51,16 +54,16 @@ TEXT = {
         'city_intro': 'Starting with Shanghai and Tokyo.',
         'notice': 'The detailed articles currently exist in Chinese. English translations will follow after the Chinese text is reviewed.',
         'topics': [
-            ('Getting started & budget', 'Plan your first sessions'), ('Technique & practice', 'Strokes, routines and skills from other sports'),
-            ('Gear & training tools', 'Rackets, shoes and ball machines'), ('Digital tools & smart hardware', 'Mini apps, apps and devices'),
-            ('Fitness', 'Conditioning, recovery and food'), ('Courts & booking', 'Compare the real cost of a court'),
-            ('Partners & matches', 'Find players and join matches'),
+            ('Getting started & budget', 'Plan your first sessions'), ('Courts & booking', 'Compare the real cost of a court'),
+            ('Partners & matches', 'Find players and join matches'), ('Technique & practice', 'Strokes, routines and skills from other sports'),
+            ('Gear & training tools', 'Rackets, shoes and ball machines'), ('Fitness', 'Conditioning, recovery and food'),
+            ('Digital tools & smart hardware', 'Mini apps, apps and devices'),
         ],
         'cities': ('Shanghai', 'Tokyo'),
-        'city_topics': ('Courts', 'Find players', 'Coaches', 'Hitting partners', 'Practice walls',
-                        'Ball machines & practice courts', 'Demo & rental rackets', 'Stringing',
-                        'Tournaments & events', 'Tennis trips'),
-        'city_groups': ('Play & practice', 'Gear & services', 'Events & trips'),
+        'city_topics': ('Courts', 'Practice walls', 'Ball machines & practice courts',
+                        'Find players', 'Coaches', 'Hitting partners',
+                        'Demo & rental rackets', 'Stringing', 'Tournaments & events', 'Tennis trips'),
+        'city_groups': ('Find a court', 'Find people', 'Gear services', 'Events & trips'), 'pending': 'Soon',
         'detail_pending': 'Content coming soon.', 'back': 'Back to the guide',
         'overview': 'Overview', 'back_city': 'Back to city topics', 'back_topic': 'Back to this topic',
         'contribute': 'Contribute ↗',
@@ -73,15 +76,15 @@ TEXT = {
         'city_intro': '上海と東京から始めます。',
         'notice': '詳しい記事は現在中国語のみです。中国語版の内容確認後、順次日本語に翻訳します。',
         'topics': [
-            ('始め方と予算', '最初の一歩と費用'), ('技術と練習', '基本動作、練習計画、他競技からの学び'),
-            ('用具と練習器具', 'ラケット、シューズ、球出し機'), ('デジタルツールとスマート機器', 'ミニアプリ、アプリ、機器'),
-            ('体づくり', '体力、回復、食事'), ('コートと予約', 'コートの実質的な費用を比べる'),
-            ('仲間と試合', '相手を探し、試合に参加する'),
+            ('始め方と予算', '最初の一歩と費用'), ('コートと予約', 'コートの実質的な費用を比べる'),
+            ('仲間と試合', '相手を探し、試合に参加する'), ('技術と練習', '基本動作、練習計画、他競技からの学び'),
+            ('用具と練習器具', 'ラケット、シューズ、球出し機'), ('体づくり', '体力、回復、食事'),
+            ('デジタルツールとスマート機器', 'ミニアプリ、アプリ、機器'),
         ],
         'cities': ('上海', '東京'),
-        'city_topics': ('コート予約', '仲間探し', 'コーチ', '練習相手', '壁打ち', '球出し機と練習場',
+        'city_topics': ('コート予約', '壁打ち', '球出し機と練習場', '仲間探し', 'コーチ', '練習相手',
                         '試打とレンタル', 'ガット張り', '大会とイベント', 'テニス旅行'),
-        'city_groups': ('プレーと練習', '用具とサービス', 'イベントと旅行'),
+        'city_groups': ('コートを探す', '相手を探す', '用具サービス', '大会と旅行'), 'pending': '準備中',
         'detail_pending': '内容は準備中です。', 'back': 'ガイドの目次に戻る',
         'overview': '概要', 'back_city': '都市別の目次に戻る', 'back_topic': 'カテゴリに戻る',
         'contribute': '共同編集 ↗',
@@ -103,6 +106,18 @@ COURT = (
     '<path class="court-seam" d="M252 141c7 5 7 13 1 19M272 141c-7 5-7 13-1 19"/>'
     '</svg>'
 )
+
+
+def topic_ready(path):
+    """A city topic is ready once any of its articles has more than placeholder text."""
+    for article in path.glob('*.md'):
+        text = article.read_text(encoding='utf-8')
+        if any(marker in text for marker in PENDING_MARKERS):
+            continue
+        body = re.sub(r'^#.*$|\[[^\]]*\]\([^)]*\)|[\s>*:：、。-]', '', text, flags=re.M)
+        if len(body) >= 20:
+            return True
+    return False
 
 
 def reader_link(path):
@@ -130,6 +145,8 @@ def render_home(code, data):
             f'<div class="city-group"><h4>{q(data["city_groups"][group_index])}</h4><div class="city-links">'
             + ''.join(
                 f'<a href="{reader_link(f"cities/{city_dir}/{CITY_TOPICS[i]}/README.md")}">{q(data["city_topics"][i])}</a>'
+                if topic_ready(SOURCE / 'cities' / city_dir / CITY_TOPICS[i]) else
+                f'<span class="pending">{q(data["city_topics"][i])}<small>{q(data["pending"])}</small></span>'
                 for i in range(start, end)
             ) + '</div></div>'
             for group_index, (start, end) in enumerate(CITY_GROUPS)

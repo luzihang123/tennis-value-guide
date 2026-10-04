@@ -69,6 +69,8 @@ h2{font-size:clamp(28px,4vw,40px);line-height:1.2;margin:8px 0 12px}
 .city-links{display:flex;gap:8px;flex-wrap:wrap}
 .city-links a{border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px;background:var(--bg);transition:background .2s,border-color .2s}
 .city-links a:hover{background:var(--accent-soft);border-color:var(--court)}
+.city-links .pending{display:inline-flex;align-items:center;gap:6px;border:1px dashed var(--line);border-radius:999px;padding:6px 8px 6px 14px;font-size:14px;color:var(--muted)}
+.pending small{padding:0 7px;border-radius:999px;background:var(--accent-soft);font-size:11px;line-height:1.8}
 
 /* Footer */
 footer{background:var(--footer);color:var(--footer-ink);padding:28px 0;font-size:13px}
